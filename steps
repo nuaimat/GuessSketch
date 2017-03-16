@@ -1,0 +1,11 @@
+open docker:
+docker run -it -v ~/Dropbox/MUM/courses/Machine\ Learning/projectGroup7/dataset/v1_jpg:/v1_jpg gcr.io/tensorflow/tensorflow:latest-devel
+
+start training:
+python tensorflow/examples/image_retraining/retrain.py \
+--bottleneck_dir=/v1_jpg/bottlenecks \
+--how_many_training_steps 500 \
+--model_dir=/v1_jpg/inception \
+--output_graph=/v1_jpg/retrained_graph.pb \
+--output_labels=/v1_jpg/retrained_labels.txt \
+--image_dir /v1_jpg/sketches

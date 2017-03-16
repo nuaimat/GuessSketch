@@ -1,0 +1,12 @@
+triangle
+square
+angle
+car
+fish
+line
+dog
+tree
+cat
+home
+circle
+bird
