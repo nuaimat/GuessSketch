@@ -5,11 +5,19 @@ import warnings
 import json
 import time
 from flipflop import WSGIServer
+from werkzeug.wrappers import Request, Response
 
 
+def store_file(request):
+    file = request.files.get('file')
+    fname = '/Users/nuaimat/Sites/www/file.jpg'
+    if file:
+        file.save(fname)
+    return(fname)
 
 def app(environ, start_response):
-     start_response('200 OK', [('Content-Type', 'application/json')])
+     request = Request(environ)
+     #start_response('200 OK', [('Content-Type', 'application/json')])
 
      image_path = "/Users/nuaimat/dataset/v1_jpg/test/car2.jpg"
 
@@ -30,7 +38,10 @@ def app(environ, start_response):
      graph_def.ParseFromString(retrained_graph_lines)
      _ = tf.import_graph_def(graph_def, name='')
 
-     retList = []
+     retList = {}
+     retList["data"] = [];
+     retList["debug"] = [{'label': request.args.get('label', 'no value for label')}];
+     retList["debug"].append({'file': store_file(request)});
      with tf.Session() as sess:
          # Feed the image_data as input to the graph and get first prediction
          softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
@@ -46,8 +57,10 @@ def app(environ, start_response):
              jScore = {}
              jScore['score'] = int(score*100)
              jScore['label'] = human_string
-             retList.append(jScore)
-     return(json.dumps(retList))
+             retList["data"].append(jScore)
+
+     response = Response(json.dumps(retList), mimetype='application/json')
+     return(response(environ, start_response))
 
 
 WSGIServer(app).run()
