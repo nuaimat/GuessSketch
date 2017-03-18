@@ -6,11 +6,14 @@ import json
 import time
 from flipflop import WSGIServer
 from werkzeug.wrappers import Request, Response
+import uuid
+import tempfile
 
 
-def store_file(request):
+def store_file(request, fname):
     file = request.files.get('file')
-    fname = '/Users/nuaimat/Sites/www/file.jpg'
+    #fname = '/Users/nuaimat/Sites/www/'+ str(uuid.uuid4()) +'.jpg'
+
     if file:
         file.save(fname)
     return(fname)
@@ -19,10 +22,7 @@ def app(environ, start_response):
      request = Request(environ)
      #start_response('200 OK', [('Content-Type', 'application/json')])
 
-     image_path = "/Users/nuaimat/dataset/v1_jpg/test/car2.jpg"
 
-     # Read in the image_data
-     image_data = tf.gfile.FastGFile(image_path, 'rb').read()
 
        # Loads label file, strips off carriage return
      label_lines = [line.rstrip() for line
@@ -38,10 +38,18 @@ def app(environ, start_response):
      graph_def.ParseFromString(retrained_graph_lines)
      _ = tf.import_graph_def(graph_def, name='')
 
+     fname = tempfile.NamedTemporaryFile(delete=True, suffix='.jpg')
+     uploaded_image_path = store_file(request, fname.name);
+
+     #image_path = "/Users/nuaimat/dataset/v1_jpg/test/car2.jpg"
+
+     # Read in the image_data
+     image_data = tf.gfile.FastGFile(uploaded_image_path, 'rb').read()
+
      retList = {}
      retList["data"] = [];
      retList["debug"] = [{'label': request.args.get('label', 'no value for label')}];
-     retList["debug"].append({'file': store_file(request)});
+     retList["debug"].append({'file': uploaded_image_path});
      with tf.Session() as sess:
          # Feed the image_data as input to the graph and get first prediction
          softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
@@ -60,6 +68,7 @@ def app(environ, start_response):
              retList["data"].append(jScore)
 
      response = Response(json.dumps(retList), mimetype='application/json')
+     fname.close()
      return(response(environ, start_response))
 
 
