@@ -22,6 +22,13 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
+            
+		    <plugin>
+		        <groupId>org.apache.tomcat.maven</groupId>
+		        <artifactId>tomcat7-maven-plugin</artifactId>
+		        <version>2.2</version>
+		    </plugin>
+
         </plugins>
     </build>
 
@@ -60,6 +67,19 @@
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.3</version>
+        </dependency>
+
+
     </dependencies>
     <properties>
         <jersey.version>2.25.1</jersey.version>
