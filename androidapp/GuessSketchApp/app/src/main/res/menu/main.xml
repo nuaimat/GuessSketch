@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/save_menu"
+        android:icon="@drawable/save"
+        android:showAsAction="ifRoom"
+        android:title="@string/save">
+    </item>
+
+    <item
+        android:id="@+id/clear_all_menu"
+        android:icon="@drawable/clear_all"
+        android:showAsAction="ifRoom"
+        android:title="@string/clear_all">
+    </item>
+
+    <item
+        android:id="@+id/color_menu"
+        android:icon="@drawable/color"
+        android:showAsAction="ifRoom"
+        android:title="@string/color"/>
+
+    <item
+        android:id="@+id/size_menu"
+        android:icon="@drawable/size"
+        android:showAsAction="ifRoom"
+        android:title="@string/brush_size">
+    </item>
+    <item
+        android:id="@+id/erase_menu"
+        android:icon="@drawable/erase"
+        android:showAsAction="ifRoom"
+        android:title="@string/erase">
+    </item>
+
+    <item
+        android:id="@+id/normal_brush_menu"
+        android:icon="@drawable/size"
+        android:showAsAction="ifRoom"
+        android:title="@string/normal">
+    </item>
+
+
+    <item
+        android:id="@+id/about_menu"
+        android:icon="@+drawable/about"
+        android:showAsAction="ifRoom"
+        android:title="@string/about">
+    </item>
+
+
+</menu>
