@@ -43,13 +43,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout.LayoutParams;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,12 +75,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 @SuppressLint("ClickableViewAccessibility")
 public class EasyPaint extends GraphicsActivity implements
 		ColorPickerDialog.OnColorChangedListener {
+
+	enum ApiCallType {
+		GUESS_IMAGE,
+		POSITIVE_FEEDBACK,
+		NEGATIVE_FEEDBACK
+	}
 
 	public static int DEFAULT_BRUSH_SIZE = 10;
 	private static int MAX_POINTERS = 10;
@@ -86,6 +102,10 @@ public class EasyPaint extends GraphicsActivity implements
 
 	private boolean waitingForBackgroundColor = false; //If true and colorChanged() is called, fill the background, else mPaint.setColor()
 	private boolean extractingColor = false; //If this is true, the next touch event should extract a color rather than drawing a line.
+	private float pixels5 = 0.f;
+	private LinearLayout predictions;
+	ProgressBar loader;
+	Button saveButton;
 
 
 	@Override
@@ -95,9 +115,72 @@ public class EasyPaint extends GraphicsActivity implements
 		// it removes the title from the actionbar(more space for icons?)
 		// this.getActionBar().setDisplayShowTitleEnabled(false);
 
+		pixels5 = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+		LinearLayout parent = new LinearLayout(this);
+
+		parent.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		parent.setOrientation(LinearLayout.VERTICAL);
+
+		LinearLayout scrollViewParent = new LinearLayout(this);
+
+		scrollViewParent.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+		scrollViewParent.setOrientation(LinearLayout.HORIZONTAL);
+
+		HorizontalScrollView predictionsHorizontalScrollView = new HorizontalScrollView(this);
+		//predictionsHorizontalScrollView.setLayoutParams(new ViewGroup.LayoutParams());
+
+
+
+		predictions = new LinearLayout(this);
+		LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+		params.gravity = Gravity.CENTER_VERTICAL;
+		predictions.setLayoutParams(params);
+
+		predictions.setOrientation(LinearLayout.HORIZONTAL);
+
+		resetPredictionsView(predictions, true);
+		predictionsHorizontalScrollView.addView(predictions);
+
+
+
+		saveButton = new Button(this);
+		saveButton.setText("Submit");
+
+		predictionsHorizontalScrollView.setLayoutParams(new LinearLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT,
+				10.0f
+		));
+
+		saveButton.setLayoutParams(new LinearLayout.LayoutParams(
+				LayoutParams.WRAP_CONTENT,
+				LayoutParams.MATCH_PARENT,
+				1.0f
+		));
+
+		saveButton.setVisibility(View.INVISIBLE);
+
+		FrameLayout frameLayout = new FrameLayout(this);
+		frameLayout.setLayoutParams(new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+		frameLayout.addView(saveButton);
+
+		loader = new ProgressBar(this);
+		loader.setLayoutParams(new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		loader.setIndeterminate(true);
+		loader.setVisibility(ProgressBar.INVISIBLE);
+
+		frameLayout.addView(loader);
+
+		scrollViewParent.addView(predictionsHorizontalScrollView);
+		scrollViewParent.addView(frameLayout);
+
 		contentView = new MyView( this );
-		setContentView( contentView );
+		parent.addView(scrollViewParent);
+		parent.addView(contentView);
+
+		setContentView( parent );
 
 		mPaint = new Paint();
 		mPaint.setAntiAlias(true);
@@ -119,7 +202,7 @@ public class EasyPaint extends GraphicsActivity implements
 
 			alert.setTitle(R.string.app_name);
 			alert.setMessage(R.string.app_description);
-			alert.setNegativeButton(R.string.continue_fuck,
+			alert.setNegativeButton(R.string.continue_button,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -136,6 +219,32 @@ public class EasyPaint extends GraphicsActivity implements
 		}
 
 		loadFromIntents();
+	}
+
+	private void resetPredictionsView(LinearLayout predictions, boolean showInitLabel) {
+
+
+		predictions.removeAllViews();
+
+		if(showInitLabel) {
+			TextView tv1 = new TextView(this);
+			tv1.setText("Predictions will appear Here");
+			LinearLayout.LayoutParams params  = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			params.weight = 1.f;
+			params.gravity = Gravity.CENTER_VERTICAL;
+
+
+			tv1.setLayoutParams(params);
+
+			tv1.setTextSize(pixels5);
+			predictions.addView(tv1);
+		}
+
+		if(saveButton != null)
+			saveButton.setVisibility(View.INVISIBLE);
+		if(loader != null)
+			loader.setVisibility(View.INVISIBLE);
 	}
 
 	@Override
@@ -172,6 +281,16 @@ public class EasyPaint extends GraphicsActivity implements
 
 
 	public void refreshLabels(JSONObject jObject){
+
+
+		/* Button btn = new Button(this);
+		btn.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+				getResources().getDimensionPixelSize(R.dimen.prediction_text_view_height) ));
+		btn.setTextSize(pixels);
+		btn.setText("Cat");
+		predictions.addView(btn); */
+		final List<RadioButton> buttons = new ArrayList<>();
+
 		String result = "I think it's: ";
 		try {
 			JSONArray jArray = jObject.getJSONArray("data");
@@ -180,26 +299,45 @@ public class EasyPaint extends GraphicsActivity implements
 				JSONObject prediction = jArray.getJSONObject(i);
 				// Pulling items from the array
 				int score = prediction.getInt("score");
+				if(score < Constants.minScoreThershold){
+					continue;
+				}
 				String label = prediction.getString("label");
 
-				result += "\"" + label + "\" : " + score + " ";
+				result += "\"" + label + "\" : " + score + "% ";
+
+				RadioButton radioButton = new RadioButton(EasyPaint.this);
+				radioButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+						getResources().getDimensionPixelSize(R.dimen.prediction_text_view_height) ));
+				radioButton.setTextSize(pixels5);
+				radioButton.setText(label + " ("+score+"%)");
+				//radioButton.set
+				//predictions.addView(radioButton);
+				buttons.add(radioButton);
 			}
 
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 
+
+
 		toastMessage = result;
 
 		EasyPaint.this.runOnUiThread(new Runnable() {
 			public void run() {
+				resetPredictionsView(predictions, false);
 				Toast.makeText(getApplicationContext(),
 						toastMessage,
 						Toast.LENGTH_LONG).show();
+				for(RadioButton r:buttons){
+					predictions.addView(r);
+				}
 			}
 		});
 
 	}
+
 
 	private String toastMessage = "";
 
@@ -300,9 +438,8 @@ public class EasyPaint extends GraphicsActivity implements
 			Display display = getWindowManager().getDefaultDisplay();
 			Point size = new Point();
 			display.getSize(size);
-			mBitmapBackground = Bitmap.createBitmap(size.x, size.y,  Bitmap.Config.ARGB_8888);
-			mBitmap = Bitmap.createBitmap(size.x, size.y,
-					Bitmap.Config.ARGB_8888);
+			mBitmapBackground = Bitmap.createBitmap(size.x, size.y-30,  Bitmap.Config.ARGB_8888);
+			mBitmap = Bitmap.createBitmap(size.x, size.y-30, Bitmap.Config.ARGB_8888);
 			mCanvas = new Canvas(mBitmap);
 			mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 			multiLinePathManager = new MultiLinePathManager(MAX_POINTERS);
@@ -359,7 +496,10 @@ public class EasyPaint extends GraphicsActivity implements
 							Log.e( "Guess-a-sketch", "Too many fingers!" );
 						}
 					}
-					
+
+					resetPredictionsView(predictions, true);
+					saveButton.setVisibility(View.INVISIBLE);
+					loader.setVisibility(View.INVISIBLE);
 					break;
 				}
 				case MotionEvent.ACTION_MOVE:
@@ -502,6 +642,9 @@ public class EasyPaint extends GraphicsActivity implements
 			}
 			case R.id.clear_all_menu: {
 				contentView.mBitmap.eraseColor( Color.TRANSPARENT );
+				if(predictions != null) {
+					resetPredictionsView(predictions, true);
+				}
 				return true;
 			}
 			case R.id.save_menu:
@@ -519,6 +662,9 @@ public class EasyPaint extends GraphicsActivity implements
 	 * This takes the screenshot of the whole screen. Is this a good thing?
 	 */
 	private File sendScreenshot(boolean showToast) {
+		saveButton.setVisibility(View.INVISIBLE);
+		loader.setVisibility(View.VISIBLE);
+
 		View v = findViewById(R.id.CanvasId);
 		v.setDrawingCacheEnabled(true);
 		Bitmap cachedBitmap = v.getDrawingCache();
@@ -540,7 +686,7 @@ public class EasyPaint extends GraphicsActivity implements
 			output = new FileOutputStream(file);
 			copyBitmap.compress(CompressFormat.JPEG, 60, output);
 
-			sendPost(file);
+			sendPost(file, ApiCallType.GUESS_IMAGE);
 
 		} catch (FileNotFoundException e) {
 			file = null;
@@ -578,16 +724,43 @@ public class EasyPaint extends GraphicsActivity implements
 		}
 	}
 
-	private void sendPost(final File file) {
+	private void sendPost(final File file, final ApiCallType apiCallType) {
 
 		AsyncTask<File, Void, String> task = new AsyncTask<File, Void, String>(){
 			@Override
+			protected void onCancelled() {
+				super.onCancelled();
+				saveButton.setVisibility(View.VISIBLE);
+				loader.setVisibility(View.INVISIBLE);
+			}
+
+			@Override
+			protected void onPostExecute(String s) {
+				super.onPostExecute(s);
+				saveButton.setVisibility(View.VISIBLE);
+				loader.setVisibility(View.INVISIBLE);
+			}
+
+			@Override
 			protected String doInBackground(File... files) {
 				String responseString = "";
-				String url = "http://mo-macbook.local/app.py";
 
 				try {
-					MultipartUtility multipart = new MultipartUtility(url, "utf-8");
+					String endpointURL = "";
+					switch (apiCallType) {
+						case NEGATIVE_FEEDBACK:
+							endpointURL = Constants.negativeFeedback;
+							break;
+						case POSITIVE_FEEDBACK:
+							endpointURL = Constants.positiveFeedback;
+							break;
+						case GUESS_IMAGE:
+						default:
+							endpointURL = Constants.guessAPI;
+
+					}
+					Log.e("sendPost", "Trying API " + endpointURL);
+					MultipartUtility multipart = new MultipartUtility(endpointURL, "utf-8");
 
 					multipart.addFormField("label", "test label");
 
@@ -603,6 +776,7 @@ public class EasyPaint extends GraphicsActivity implements
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
+					Log.e("sendPost", e.getMessage());
 				}
 
 				try {
@@ -611,6 +785,7 @@ public class EasyPaint extends GraphicsActivity implements
 
 				} catch (JSONException e) {
 					e.printStackTrace();
+					Log.e("sendPost", e.getMessage());
 				}
 
 				return responseString;

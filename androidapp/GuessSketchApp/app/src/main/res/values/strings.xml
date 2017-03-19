@@ -19,7 +19,7 @@
     <string name="choose_width">Brush size</string>
     <string name="saved_your_location_to">Saved your artwork to %1$s</string>
     <string name="select">Select</string>
-    <string name="continue_fuck">Continue</string> <!-- Workaround to avoid "R.string.continue", that it's as a special class-word! D: -->
+    <string name="continue_button">Continue</string> <!-- Workaround to avoid "R.string.continue", that it's as a special class-word! D: -->
     <string name="ok">OK</string>
     <string name="pick_color">Pick a Color</string>
     <string name="toolbox_share_title">Share</string>

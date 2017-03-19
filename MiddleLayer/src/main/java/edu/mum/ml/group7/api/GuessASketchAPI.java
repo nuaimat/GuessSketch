@@ -42,7 +42,7 @@ public class GuessASketchAPI {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getIt() {
-        return "Got it! simple GET";
+        return "Got it!";
     }
 
     @GET
@@ -50,8 +50,8 @@ public class GuessASketchAPI {
     @Produces(MediaType.APPLICATION_JSON)
     public String getJson() {
         JsonObject myObject = Json.createObjectBuilder()
-                .add("name", "Agamemnon")
-                .add("age", 32)
+                .add("name", "Mo")
+                .add("age", 33)
                 .build();
         return myObject.toString();
     }
@@ -63,9 +63,10 @@ public class GuessASketchAPI {
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("label") String label
     ) throws IOException {
-        String url = "http://mo-macbook.local/app.py";
-        //String uploadedFileLocation = "D:/MachineLearning/uploads/" + "guess-" + java.util.UUID.randomUUID() + ".jpg";
-        File temp = File.createTempFile("guess-",".jpg", new File("D:/MachineLearning/uploads/"));
+        System.out.println("\nProcessing a request ...");
+
+        String url = Constants.TENSORFLOW_API;
+        File temp = File.createTempFile("guess-",".jpg", new File(Constants.UPLOAD_FOLDER_BASE));
         String uploadedFileLocation = temp.getName();
         // save it
         writeToFile(fileInputStream, temp);
