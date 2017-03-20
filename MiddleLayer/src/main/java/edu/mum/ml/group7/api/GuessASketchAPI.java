@@ -132,6 +132,9 @@ public class GuessASketchAPI {
         HttpClient client = new DefaultHttpClient();
         HttpPost post = new HttpPost(url);
         FileBody bin = new FileBody(uploadedFile);
+        if(label == null){
+            label = "";
+        }
         StringBody id = new StringBody(label);
 
         // add header

@@ -62,5 +62,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public 
     <string name="tap_to_extract_color">Tap anywhere to extract a color</string>
     <string name="ability_disabled_need_newer_api_level">That ability is disabled because it requires a newer Android version (at least API level 17).</string>
     <string name="smudge">Smudge</string>
+    <string name="other_label">Other - Please Specify</string>
+    <string name="feedback_submitted">Feedback Submitted, Thanks!</string>
 
 </resources>
