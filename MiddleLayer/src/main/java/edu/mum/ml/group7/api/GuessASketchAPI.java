@@ -6,10 +6,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -61,20 +58,73 @@ public class GuessASketchAPI {
     @Produces(MediaType.APPLICATION_JSON)
     public Response guessImage(
             @FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("label") String label
+            @FormDataParam("label") String label,
+            @FormDataParam("call_type") String callType
     ) throws IOException {
         System.out.println("\nProcessing a request ...");
+        List<String> allowedCallTypes = Arrays.asList(new String[]{"guess", "pos", "neg"});
+        if(callType == null || callType == "" || !allowedCallTypes.contains(callType)){
+            callType = "guess";
+        }
+        System.out.println("callType: " + callType);
 
         String url = Constants.TENSORFLOW_API;
-        File temp = File.createTempFile("guess-",".jpg", new File(Constants.UPLOAD_FOLDER_BASE));
-        String uploadedFileLocation = temp.getName();
-        // save it
-        writeToFile(fileInputStream, temp);
 
-        String result = doPost(url, temp, label);
-        temp.delete();
+        File uploadedFile = new File(Constants.UPLOAD_FOLDER_BASE +  "dummy.dat");
+        boolean deleteFile = true;
+        switch (callType){
+            case "pos":
+            case "neg":
+                String uploadFolder = (callType.equals("neg")?Constants.NEG_UPLOAD_BASE:Constants.POS_UPLOAD_BASE)
+                        + "/" + sanitizeFileName(label);
+                File parentFolder = new File(uploadFolder);
+                if (!parentFolder.exists()) {
+                    System.out.println("creating directory: " + parentFolder.getName());
+                    boolean result = false;
+
+                    try{
+                        parentFolder.mkdir();
+                        result = true;
+                    }
+                    catch(SecurityException se){
+                        se.printStackTrace();
+                        System.out.println(se.getMessage());
+                    }
+                    if(result) {
+                        System.out.println("DIR created");
+                    }
+                }
+                if(callType.equals("neg")){
+                    uploadedFile = File.createTempFile("negative-",".jpg", parentFolder);
+                } else {
+                    uploadedFile = File.createTempFile("positive-",".jpg", parentFolder);
+                }
+
+                deleteFile = false;
+                break;
+            case "guess":
+                uploadedFile = File.createTempFile("guess-",".jpg", new File(Constants.UPLOAD_FOLDER_BASE));
+        }
+
+        //String uploadedFileLocation = temp.getName();
+        // save it
+        writeToFile(fileInputStream, uploadedFile);
+
+        String result = "";
+        if(callType.equals("guess")) {
+            result = doPost(url, uploadedFile, label);
+        } else {
+            result = "{status: \"OK\"}";
+        }
+        if(deleteFile)
+            uploadedFile.delete();
 
         return Response.status(200).entity(result).build();
+    }
+
+    private String sanitizeFileName(String label) {
+        String name = label.replaceAll("\\W+", "_");
+        return name;
     }
 
     private String doPost(String url, File uploadedFile, String label) throws IOException {

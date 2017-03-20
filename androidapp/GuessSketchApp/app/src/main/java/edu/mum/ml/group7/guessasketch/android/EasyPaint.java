@@ -747,15 +747,19 @@ public class EasyPaint extends GraphicsActivity implements
 
 				try {
 					String endpointURL = "";
+                    String callType = "";
 					switch (apiCallType) {
 						case NEGATIVE_FEEDBACK:
 							endpointURL = Constants.negativeFeedback;
+                            callType = "neg";
 							break;
 						case POSITIVE_FEEDBACK:
 							endpointURL = Constants.positiveFeedback;
+                            callType = "pos";
 							break;
 						case GUESS_IMAGE:
 						default:
+                            callType = "guess";
 							endpointURL = Constants.guessAPI;
 
 					}
@@ -763,7 +767,9 @@ public class EasyPaint extends GraphicsActivity implements
 					MultipartUtility multipart = new MultipartUtility(endpointURL, "utf8");
 
 					multipart.addFormField("label", "test label");
+                    multipart.addFormField("call_type", callType);
 					multipart.addFilePart("file", file);
+
 
 					String TAG = "upload";
 
