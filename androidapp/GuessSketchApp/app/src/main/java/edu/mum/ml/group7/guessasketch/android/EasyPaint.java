@@ -365,9 +365,22 @@ public class EasyPaint extends GraphicsActivity implements
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        radioButton.setText(input.getText().toString());
-                        saveButton.setTag(input.getText().toString());
-                        feedbackType = ApiCallType.NEGATIVE_FEEDBACK;
+                        if(input.getText().toString().length() > 0){
+                            radioButton.setText(input.getText().toString());
+                            saveButton.setTag(input.getText().toString());
+                            feedbackType = ApiCallType.NEGATIVE_FEEDBACK;
+                        } else {
+                            EasyPaint.this.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(),
+                                            "You didn't specify a name, try again please",
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            saveButton.setTag("");
+                            feedbackType = ApiCallType.POSITIVE_FEEDBACK;
+                            dialog.cancel();
+                        }
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

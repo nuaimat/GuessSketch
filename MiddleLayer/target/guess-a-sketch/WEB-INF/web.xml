@@ -14,9 +14,12 @@
             <param-value>edu.mum.ml.group7.api.MyApplication</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+
     </servlet>
     <servlet-mapping>
         <servlet-name>edu.mum.ml.group7.api.MyApplication</servlet-name>
         <url-pattern>/guess-a-sketch/*</url-pattern>
     </servlet-mapping>
+
+
 </web-app>
