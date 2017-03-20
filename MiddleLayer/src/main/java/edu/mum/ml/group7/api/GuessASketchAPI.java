@@ -74,7 +74,7 @@ public class GuessASketchAPI {
         String result = doPost(url, temp, label);
         temp.delete();
 
-        return Response.status(201).entity(result).build();
+        return Response.status(200).entity(result).build();
     }
 
     private String doPost(String url, File uploadedFile, String label) throws IOException {

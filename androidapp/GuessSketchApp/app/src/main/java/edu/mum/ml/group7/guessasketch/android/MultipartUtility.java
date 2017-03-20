@@ -1,5 +1,6 @@
 package edu.mum.ml.group7.guessasketch.android;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,7 +40,7 @@ public class MultipartUtility {
         this.charset = charset;
 
         // creates a unique boundary based on time stamp
-        boundary = "===" + System.currentTimeMillis() + "===";
+        boundary = "-----------" + System.currentTimeMillis() + "-----";
         URL url = new URL(requestURL);
         httpConn = (HttpURLConnection) url.openConnection();
         httpConn.setUseCaches(false);
@@ -47,6 +48,8 @@ public class MultipartUtility {
         httpConn.setDoInput(true);
         httpConn.setRequestProperty("Content-Type",
                 "multipart/form-data; boundary=" + boundary);
+
+
         outputStream = httpConn.getOutputStream();
         writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
                 true);
@@ -140,7 +143,14 @@ public class MultipartUtility {
             reader.close();
             httpConn.disconnect();
         } else {
-            throw new IOException("Server returned non-OK status: " + status);
+            BufferedInputStream in = new BufferedInputStream(httpConn.getErrorStream());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String error = "";
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                error += line;
+            }
+            throw new IOException("Server returned non-OK status: " + status + " error: " + error);
         }
         return response;
     }

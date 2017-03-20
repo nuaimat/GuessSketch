@@ -760,11 +760,11 @@ public class EasyPaint extends GraphicsActivity implements
 
 					}
 					Log.e("sendPost", "Trying API " + endpointURL);
-					MultipartUtility multipart = new MultipartUtility(endpointURL, "utf-8");
+					MultipartUtility multipart = new MultipartUtility(endpointURL, "utf8");
 
 					multipart.addFormField("label", "test label");
-
 					multipart.addFilePart("file", file);
+
 					String TAG = "upload";
 
 					List<String> response = multipart.finish();
