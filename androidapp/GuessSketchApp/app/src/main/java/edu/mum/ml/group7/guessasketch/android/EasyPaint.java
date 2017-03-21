@@ -786,12 +786,13 @@ public class EasyPaint extends GraphicsActivity implements
                                         R.string.saved_your_location_to),
                                 file.getAbsolutePath()), Toast.LENGTH_LONG)
                         .show();
+            /*
             // sending a broadcast to the media scanner so it will scan the new
             // screenshot.
             Intent requestScan = new Intent(
                     Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
             requestScan.setData(Uri.fromFile(file));
-            sendBroadcast(requestScan);
+            sendBroadcast(requestScan); */
 
             return file;
         } else {
@@ -831,6 +832,9 @@ public class EasyPaint extends GraphicsActivity implements
                     saveButton.setVisibility(View.VISIBLE);
                 }
                 loader.setVisibility(View.INVISIBLE);
+
+                file.delete();
+
             }
 
             @Override
@@ -843,6 +847,9 @@ public class EasyPaint extends GraphicsActivity implements
                     saveButton.setVisibility(View.VISIBLE);
                 }
                 loader.setVisibility(View.INVISIBLE);
+
+                file.delete();
+
             }
 
             @Override
