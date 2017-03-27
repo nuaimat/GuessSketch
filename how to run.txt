@@ -1,0 +1,38 @@
+for android app:
+  - android studio
+  - android sdk v21 or higher
+
+for middle layer
+  - apache tomcat 8 or higher
+  - java 1.7 or higher
+  - maven 3.3.9 or higher
+  - eclipse (optional, otherwise just deploy the war file to tomcat manager)
+
+for guess a sketch engine
+  - Tensorflow
+  - Python 3.6.0 or higher
+  - pip packages for Flipflop, Werkzeug, JSON
+  - FastCGI module for integration with Apache server
+  - Apache web server 2.4
+      suggested httpd conf :
+
+      
+      <VirtualHost *:80>
+        ServerName test
+
+        DocumentRoot /Users/nuaimat/Sites/www
+        <Directory />
+            Options FollowSymLinks ExecCGI
+            AllowOverride All
+            Require all granted
+            SetEnv PYTHONPATH "/usr/local/lib/python3.6/site-packages"
+        </Directory>
+
+        <Files app.py>
+            SetEnv PYTHONPATH "/usr/local/lib/python3.6/site-packages"
+            SetHandler fastcgi-script
+            Require all granted
+        </Files>
+        SetEnv PYTHONPATH "/usr/local/lib/python3.6/site-packages"
+        FastCgiServer /Users/nuaimat/Sites/www/app.py -processes 4 -socket /tmp/fcgi.sock -idle-timeout 30
+    </VirtualHost>
