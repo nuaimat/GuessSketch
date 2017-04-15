@@ -1,6 +1,10 @@
 # GuessSketch
 Guess a Sketch - a project for Machine Learning class - using TensorFlow , python, Java and an Android App
 
+Demo Video:
+[![Guess a Sketch App](https://img.youtube.com/vi/ObUesQ_7-Qs/0.jpg)](https://www.youtube.com/watch?v=ObUesQ_7-Qs)
+
+
 We had 3 layers, the first one is the Guess a Sketch Android App, we created an android app with a drawing canvas based on Valerio Bozzolan’s open source project called Acrylic Paint (https://github.com/valerio-bozzolan/AcrylicPaint) it is GNU license. The Android app was modified such that it doesn’t save sketches locally, but instead, send them over the internet in a POST HTTP request to the middle layer. Which in turn would return a JSON format response with labels it predicts would match this sketch. 
 
 Guess a Sketch Android app would then display those predictions to the user in a list of radio buttons, There also would be an option to suggest a different label.  If the predictions provided by the Middle layer were correct and the user selects one of them, then that would be a positive feedback for the system, we simply guessed it right, this positive feedback would be used later on to retrain the engine and increase the confidence of this prediction. 
