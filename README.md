@@ -36,5 +36,9 @@ Tensorflow : The tensorflow inception engine python interface
 JSON : to produce output in JSON format
 
 
+<<<<<<< HEAD
 PS: please refer to constants.java file inside the android app and inside the middle layer to change hardcoded folder paths, please don't blame me for not fixing this, i didn't have enough time to rewrite this in a proper way..
+=======
+PS: please refer to constants.java file inside the android app and inside the middle layer to change hardcoded folder paths. Didn't have time to solve these static values in a better way.
+>>>>>>> 957b43b44e385b658237298977e969c8141e5ef4
 
