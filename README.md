@@ -1,7 +1,7 @@
 # GuessSketch
 Guess a Sketch - a project for Machine Learning class - using TensorFlow , python, Java and an Android App
 
-Demo Video:
+Demo Video:  
 [![Guess a Sketch App](https://img.youtube.com/vi/ObUesQ_7-Qs/0.jpg)](https://www.youtube.com/watch?v=ObUesQ_7-Qs)
 
 
